@@ -17,6 +17,9 @@ public class WalletController {
 
     @PostMapping
     public ResponseEntity<Wallet> createWallet(@RequestBody Wallet wallet) {
+        if (wallet.getBalance() == null) {
+            wallet.setBalance(BigDecimal.ZERO); // Set balance to zero if it's null
+        }
         try {
             Wallet createdWallet = walletService.createWallet(wallet.getCustomerId());
             return ResponseEntity.ok(createdWallet);
@@ -71,6 +74,7 @@ public class WalletController {
         }
     }
 
+    /*
     public static class WalletRequest {
         private Long customerId;
 
@@ -87,7 +91,8 @@ public class WalletController {
         public void setCustomerId(Long customerId) {
             this.customerId = customerId;
         }
-    }
+    }*/
+
 
 
 }

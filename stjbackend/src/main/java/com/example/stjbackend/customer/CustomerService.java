@@ -30,9 +30,13 @@ public class CustomerService {
         if (customerRepository.findByUsername(customer.getUsername()).isPresent()) {
             throw new IllegalStateException("Username already taken");
         }
-        if (customerRepository.findByEmail(customer.getEmail()).isPresent()) {
+        customerRepository.findByEmail(customer.getEmail()).ifPresent(existing -> {
+            // Check if the wallet exists for the existing customer
+            if (!doesWalletExist(existing.getId())) {
+                createWallet(existing.getId());
+            }
             throw new IllegalStateException("Email already taken");
-        }
+        });
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         Customer registeredCustomer = customerRepository.save(customer);
 
@@ -48,6 +52,22 @@ public class CustomerService {
         }
 
         return registeredCustomer;
+    }
+    private void createWallet(Long customerId) {
+        String walletServiceUrl = "http://localhost:8081/api/wallets"; // Adjust the port and URL as needed
+        Wallet newWallet = new Wallet();
+        newWallet.setCustomerId(customerId);
+        restTemplate.postForObject(walletServiceUrl, newWallet, Wallet.class);
+    }
+
+    private boolean doesWalletExist(Long customerId) {
+        String walletServiceUrl = "http://localhost:8081/api/wallets/" + customerId;
+        try {
+            restTemplate.getForObject(walletServiceUrl, Wallet.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 

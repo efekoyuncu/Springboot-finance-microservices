@@ -12,3 +12,4 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     @Query(value = "SELECT w FROM Wallet w ORDER BY w.balance DESC")
     List<Wallet> findTopLoaders(int topN);
 }
+
